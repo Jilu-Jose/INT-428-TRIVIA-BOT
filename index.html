@@ -1,381 +1,532 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TriviaBot</title>
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="icon" href="data:,">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/@lucide/web@latest"></script>
+  <meta charset="UTF-8">
+  <title>Tensor AI Assistant</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(45deg, #1a0033, #330066, #4d0099);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: #ffffff;
+      min-height: 100vh;
+    }
+
+    nav {
+      background: rgba(26, 0, 51, 0.95);
+      padding: 1rem 2rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      animation: slideIn 0.5s ease-out;
+    }
+
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo i {
+      color: #9C27B0;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      padding: 5px 15px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      background: rgba(156, 39, 176, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .app-container {
+      display: flex;
+      padding-top: 80px;
+      min-height: calc(100vh - 80px);
+      max-width: 1400px;
+      margin: 0 auto;
+      gap: 20px;
+      padding: 100px 20px 20px 20px;
+    }
+
+    .chat-history {
+      width: 300px;
+      background: rgba(30, 30, 30, 0.95);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: calc(100vh - 120px);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .history-header {
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 15px;
+    }
+
+    .history-header h3 {
+      background: linear-gradient(45deg, #9C27B0, #E1BEE7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: 20px;
+    }
+
+    .chat-list {
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .chat-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat-list::-webkit-scrollbar-track {
+      background: rgba(30, 30, 30, 0.5);
+      border-radius: 4px;
+    }
+
+    .chat-list::-webkit-scrollbar-thumb {
+      background: #9C27B0;
+      border-radius: 4px;
+    }
+
+    .chat-item {
+      padding: 12px;
+      background: rgba(156, 39, 176, 0.1);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(156, 39, 176, 0.2);
+    }
+
+    .chat-item:hover {
+      background: rgba(156, 39, 176, 0.2);
+      transform: translateX(5px);
+    }
+
+    .chat-item.active {
+      background: rgba(156, 39, 176, 0.3);
+      border-color: #9C27B0;
+    }
+
+    .chat-item h4 {
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: #E1BEE7;
+    }
+
+    .chat-item p {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-container {
+      flex-grow: 1;
+      background: rgba(30, 30, 30, 0.95);
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      animation: fadeIn 0.5s ease-out;
+      height: calc(100vh - 120px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header h2 {
+      background: linear-gradient(45deg, #9C27B0, #E1BEE7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: 28px;
+    }
+
+    .chat-box {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 20px;
+      margin-bottom: 20px;
+      background-color: rgba(37, 37, 37, 0.8);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .chat-box::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chat-box::-webkit-scrollbar-track {
+      background: rgba(30, 30, 30, 0.5);
+      border-radius: 4px;
+    }
+
+    .chat-box::-webkit-scrollbar-thumb {
+      background: #9C27B0;
+      border-radius: 4px;
+    }
+
+    .message {
+      margin: 15px 0;
+      padding: 16px 20px;
+      border-radius: 12px;
+      max-width: 85%;
+      line-height: 1.6;
+      animation: fadeIn 0.3s ease-out;
+      white-space: pre-line;
+      font-size: 15px;
+    }
+
+    .message p {
+      margin: 12px 0;
+    }
+
+    .message ul, .message ol {
+      margin: 12px 0;
+      padding-left: 24px;
+    }
+
+    .message li {
+      margin: 8px 0;
+    }
+
+    .user {
+      color: #E1BEE7;
+      background: rgba(156, 39, 176, 0.15);
+      margin-left: auto;
+      border-bottom-right-radius: 2px;
+      transform-origin: right;
+    }
+
+    .bot {
+      color: #ffffff;
+      background: rgba(156, 39, 176, 0.25);
+      margin-right: auto;
+      border-bottom-left-radius: 2px;
+      transform-origin: left;
+      white-space: pre-wrap;
+    }
+
+    .bot strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+      color: #CE93D8;
+    }
+
+    .input-container {
+      display: flex;
+      gap: 10px;
+      position: relative;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 16px;
+      background: rgba(37, 37, 37, 0.8);
+      border: 1px solid rgba(156, 39, 176, 0.3);
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #9C27B0;
+      box-shadow: 0 0 15px rgba(156, 39, 176, 0.3);
+    }
+
+    button {
+      padding: 12px 24px;
+      background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background: linear-gradient(45deg, #7B1FA2, #6A1B9A);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .message strong {
+      color: #CE93D8;
+      font-weight: 600;
+    }
+
+    .new-chat-btn {
+      width: 100%;
+      margin-bottom: 15px;
+      justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+      
+      .chat-history {
+        display: none;
+      }
+      
+      .app-container {
+        padding: 90px 10px 10px 10px;
+      }
+      
+      .chat-container {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-brand">
-            <i data-lucide="brain-circuit"></i>
-            <span>TriviaBot</span>
-        </div>
-        <div class="nav-links">
-            <a href="#" class="nav-link active" data-page="home">Home</a>
-            <a href="#" class="nav-link" data-page="leaderboard">Leaderboard</a>
-            <a href="#" class="nav-link" data-page="profile">Profile</a>
-            <a href="#" class="nav-link" data-page="puzzles">Puzzles</a>
-        </div>
-        <div class="nav-auth">
-            <span class="username-display"></span>
-            <button class="login-btn" onclick="toggleLogin()">Login</button>
-            <button class="logout-btn hidden" onclick="logout()">Logout</button>
-        </div>
-    </nav>
+  <nav>
+    <div class="nav-content">
+      <a href="#" class="nav-logo">
+        <i class="fas fa-robot"></i>
+        Tensor AI
+      </a>
+      <div class="nav-links">
+        <a href="#"><i class="fas fa-home"></i> Home</a>
+        <a href="#"><i class="fas fa-info-circle"></i> About</a>
+        <a href="#"><i class="fas fa-cog"></i> Settings</a>
+      </div>
+    </div>
+  </nav>
 
-    <div id="login-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Welcome to TriviaBot</h2>
-                <p class="modal-subtitle">Sign in to track your progress and compete with others!</p>
-            </div>
-            
-            <div class="social-login">
-                <button class="social-btn google-btn">
-                    <i data-lucide="chrome"></i>
-                    Continue with Google
-                </button>
-                <button class="social-btn apple-btn">
-                    <i data-lucide="smartphone"></i>
-                    Continue with Apple
-                </button>
-                <button class="social-btn microsoft-btn">
-                    <i data-lucide="windows"></i>
-                    Continue with Microsoft
-                </button>
-            </div>
-
-            <div class="divider">
-                <span>or</span>
-            </div>
-
-            <form id="login-form" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <div class="input-group">
-                        <i data-lucide="user"></i>
-                        <input type="text" id="username" placeholder="Enter your username" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="input-group">
-                        <i data-lucide="lock"></i>
-                        <input type="password" id="password" placeholder="Enter your password" required>
-                        <button type="button" class="toggle-password" onclick="togglePassword()">
-                            <i data-lucide="eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="form-options">
-                    <label class="remember-me">
-                        <input type="checkbox" id="remember">
-                        <span>Remember me</span>
-                    </label>
-                    <a href="#" class="forgot-password">Forgot password?</a>
-                </div>
-                <button type="submit" class="login-btn">Sign In</button>
-            </form>
-
-            <div class="signup-prompt">
-                <p>Don't have an account? <a href="#" onclick="toggleSignup()">Sign up</a></p>
-            </div>
-        </div>
+  <div class="app-container">
+    <div class="chat-history">
+      <div class="history-header">
+        <h3>Chat History</h3>
+      </div>
+      <button class="new-chat-btn" onclick="startNewChat()">
+        <i class="fas fa-plus"></i>
+        New Chat
+      </button>
+      <div class="chat-list" id="chatList">
+        <!-- Chat history items will be added here -->
+      </div>
     </div>
 
-    <main id="app">
-        <div id="welcome-screen" class="screen">
-            <div class="welcome-content">
-                <i data-lucide="brain-circuit" class="large-icon"></i>
-                <h1>Welcome to TriviaBot</h1>
-                <p>Challenge yourself with our exciting trivia questions!</p>
-                
-                <div class="game-settings">
-                    <div class="setting-group">
-                        <label>Category:</label>
-                        <select id="category">
-                            <option value="9">General Knowledge</option>
-                            <option value="10">Entertainment: Books</option>
-                            <option value="11">Entertainment: Film</option>
-                            <option value="12">Entertainment: Music</option>
-                            <option value="15">Entertainment: Video Games</option>
-                            <option value="17">Science & Nature</option>
-                            <option value="18">Science: Computers</option>
-                            <option value="21">Sports</option>
-                            <option value="23">History</option>
-                            <option value="24">Politics</option>
-                            <option value="27">Animals</option>
-                            <option value="28">Vehicles</option>
-                            <option value="29">Aircraft</option>
-                        </select>
-                    </div>
-                    <div class="setting-group">
-                        <label>Difficulty:</label>
-                        <select id="difficulty">
-                            <option value="easy">Easy</option>
-                            <option value="medium">Medium</option>
-                            <option value="hard">Hard</option>
-                        </select>
-                    </div>
-                </div>
+    <div class="chat-container">
+      <div class="header">
+        <h2>Ask Tensor!</h2>
+      </div>
+      <div class="chat-box" id="chatBox"></div>
+      <div class="input-container">
+        <input 
+          type="text" 
+          id="userInput" 
+          placeholder="Ask me anything..." 
+          onkeypress="if(event.key === 'Enter') sendMessage()"
+        />
+        <button onclick="sendMessage()">
+          <i class="fas fa-paper-plane"></i>
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
 
-                <button id="start-btn" class="pulse-button">Start Game</button>
-            </div>
-        </div>
+  <script>
+    let chatHistory = [];
+    let currentChatId = null;
 
-        <div id="game-screen" class="screen hidden">
-            <div class="game-header">
-                <div class="game-stats">
-                    <div class="stat">
-                        <i data-lucide="timer"></i>
-                        <span id="timer">30s</span>
-                    </div>
-                    <div class="stat">
-                        <i data-lucide="zap"></i>
-                        <span id="streak">0 🔥</span>
-                    </div>
-                    <div class="stat">
-                        <i data-lucide="star"></i>
-                        <span id="score">0 / 0</span>
-                    </div>
-                </div>
-            </div>
+    function startNewChat() {
+      currentChatId = Date.now();
+      const chatItem = createChatHistoryItem(currentChatId, 'New Chat', '');
+      document.getElementById('chatBox').innerHTML = '';
+      document.getElementById('userInput').focus();
+      
+      // Remove active class from all chat items
+      document.querySelectorAll('.chat-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      chatItem.classList.add('active');
+    }
 
-            <div class="question-container">
-                <div class="question-meta">
-                    <div class="meta-item">
-                        <i data-lucide="settings"></i>
-                        <span id="current-category">Category: </span>
-                    </div>
-                    <span class="meta-separator">•</span>
-                    <div class="meta-item">
-                        <span id="question-number">Question 1 of 10</span>
-                    </div>
-                </div>
-                <p id="question-text"></p>
-            </div>
+    function createChatHistoryItem(id, title, lastMessage) {
+      const chatList = document.getElementById('chatList');
+      const chatItem = document.createElement('div');
+      chatItem.className = 'chat-item';
+      chatItem.dataset.chatId = id;
+      chatItem.innerHTML = `
+        <h4>${title}</h4>
+        <p>${lastMessage}</p>
+      `;
+      
+      chatItem.addEventListener('click', () => loadChat(id));
+      chatList.insertBefore(chatItem, chatList.firstChild);
+      return chatItem;
+    }
 
-            <div id="feedback" class="feedback hidden"></div>
+    function updateChatHistoryItem(id, title, lastMessage) {
+      const chatItem = document.querySelector(`.chat-item[data-chat-id="${id}"]`);
+      if (chatItem) {
+        chatItem.querySelector('h4').textContent = title;
+        chatItem.querySelector('p').textContent = lastMessage;
+      }
+    }
 
-            <div id="answers" class="answers-grid"></div>
+    function loadChat(id) {
+      // Implementation for loading previous chats
+      document.querySelectorAll('.chat-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.chatId == id) {
+          item.classList.add('active');
+        }
+      });
+    }
 
-            <div id="next-button" class="next-container hidden">
-                <button onclick="nextQuestion()">
-                    Next Question
-                    <i data-lucide="arrow-right"></i>
-                </button>
-            </div>
-        </div>
+    async function sendMessage() {
+      const userInput = document.getElementById("userInput");
+      const chatBox = document.getElementById("chatBox");
+      const message = userInput.value;
 
-        <div id="game-over-screen" class="screen hidden">
-            <div class="game-over-content">
-                <i data-lucide="trophy" class="large-icon trophy"></i>
-                <h2>Game Over!</h2>
-                <div class="final-stats">
-                    <p class="final-score">Final Score: <span id="final-score">0</span> / 10</p>
-                    <p class="highest-streak">Highest Streak: <span id="final-streak">0</span> 🔥</p>
-                </div>
-                <button onclick="restartGame()">Play Again</button>
-            </div>
-        </div>
+      if (message.trim() === "") return;
 
-        <div id="leaderboard-screen" class="screen hidden">
-            <div class="leaderboard-content">
-                <h2>🏆 Global Leaderboard</h2>
-                <div class="leaderboard-filters">
-                    <select id="leaderboard-category">
-                        <option value="all">All Categories</option>
-                        <option value="9">General Knowledge</option>
-                        <option value="18">Science: Computers</option>
-                        <option value="21">Sports</option>
-                    </select>
-                    <select id="leaderboard-timeframe">
-                        <option value="all-time">All Time</option>
-                        <option value="weekly">This Week</option>
-                        <option value="daily">Today</option>
-                    </select>
-                </div>
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Score</th>
-                            <th>Streak</th>
-                            <th>Category</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-body">
-                    </tbody>
-                </table>
-            </div>
-        </div>
+      if (!currentChatId) {
+        startNewChat();
+      }
 
-        <div id="profile-screen" class="screen hidden">
-            <div class="profile-content">
-                <div class="profile-header">
-                    <i data-lucide="user" class="profile-avatar"></i>
-                    <h2 id="profile-username">Guest User</h2>
-                </div>
-                <div class="profile-stats">
-                    <div class="stat-card">
-                        <i data-lucide="trophy"></i>
-                        <div class="stat-info">
-                            <h3>Total Games</h3>
-                            <p id="profile-total-games">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <i data-lucide="target"></i>
-                        <div class="stat-info">
-                            <h3>Average Score</h3>
-                            <p id="profile-avg-score">0%</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <i data-lucide="zap"></i>
-                        <div class="stat-info">
-                            <h3>Best Streak</h3>
-                            <p id="profile-best-streak">0</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="recent-games">
-                    <h3>Recent Games</h3>
-                    <div id="recent-games-list" class="recent-games-list">
-                    </div>
-                </div>
-            </div>
-        </div>
+      // Add user message
+      chatBox.innerHTML += `<div class="message user"><strong>You:</strong> ${message}</div>`;
+      userInput.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
 
-        <div id="puzzles-screen" class="screen hidden">
-            <div class="puzzles-content">
-                <h2>🧩 Brain Teasers</h2>
-                <div class="puzzles-grid">
-                    <!-- Memory Match -->
-                    <div class="puzzle-card" data-game="memory">
-                        <div class="puzzle-header">
-                            <h3>Memory Match</h3>
-                            <span class="difficulty">Medium</span>
-                        </div>
-                        <p>Match pairs of cards in this classic memory game.</p>
-                        <div id="memory-game" class="puzzle-container hidden">
-                            <div class="memory-grid"></div>
-                            <div class="game-controls">
-                                <span class="moves">Moves: 0</span>
-                                <button class="restart-btn">Restart</button>
-                            </div>
-                        </div>
-                        <button class="start-puzzle-btn">Play</button>
-                    </div>
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
 
-                    <!-- Word Scramble -->
-                    <div class="puzzle-card" data-game="word-scramble">
-                        <div class="puzzle-header">
-                            <h3>Word Scramble</h3>
-                            <span class="difficulty">Easy</span>
-                        </div>
-                        <p>Unscramble the letters to find the hidden word.</p>
-                        <div id="word-scramble-game" class="puzzle-container hidden">
-                            <div class="scrambled-word"></div>
-                            <input type="text" class="word-input" placeholder="Enter your answer">
-                            <div class="game-controls">
-                                <span class="score">Score: 0</span>
-                                <button class="check-btn">Check</button>
-                                <button class="next-word-btn hidden">Next Word</button>
-                            </div>
-                        </div>
-                        <button class="start-puzzle-btn">Play</button>
-                    </div>
+        const data = await response.json();
+        
+        // Format the bot's response with proper spacing
+        const formattedReply = data.reply
+          .replace(/\n\n+/g, '\n\n')  // Replace multiple newlines with double newline
+          .trim();
+        
+        // Add bot message
+        const botMessage = document.createElement('div');
+        botMessage.className = 'message bot';
+        botMessage.innerHTML = `<strong>Tensor:</strong>${formattedReply}`;
+        chatBox.appendChild(botMessage);
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-                    <!-- Number Slider -->
-                    <div class="puzzle-card" data-game="slider">
-                        <div class="puzzle-header">
-                            <h3>Number Slider</h3>
-                            <span class="difficulty">Hard</span>
-                        </div>
-                        <p>Slide the numbers to put them in order.</p>
-                        <div id="slider-game" class="puzzle-container hidden">
-                            <div class="slider-grid"></div>
-                            <div class="game-controls">
-                                <span class="moves">Moves: 0</span>
-                                <button class="restart-btn">Restart</button>
-                            </div>
-                        </div>
-                        <button class="start-puzzle-btn">Play</button>
-                    </div>
+        // Update chat history
+        updateChatHistoryItem(currentChatId, message.substring(0, 20) + "...", formattedReply.substring(0, 30) + "...");
+      } catch (error) {
+        chatBox.innerHTML += `<div class="message bot" style="color: #ff4444"><strong>Error:</strong> Failed to get response. Please try again.</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    }
 
-                    <!-- Pattern Memory -->
-                    <div class="puzzle-card" data-game="pattern">
-                        <div class="puzzle-header">
-                            <h3>Pattern Memory</h3>
-                            <span class="difficulty">Medium</span>
-                        </div>
-                        <p>Remember and repeat the pattern sequence.</p>
-                        <div id="pattern-game" class="puzzle-container hidden">
-                            <div class="pattern-grid">
-                                <!-- Add 9 grid cells for the pattern game -->
-                                <div class="pattern-cell" data-cell="1"></div>
-                                <div class="pattern-cell" data-cell="2"></div>
-                                <div class="pattern-cell" data-cell="3"></div>
-                                <div class="pattern-cell" data-cell="4"></div>
-                                <div class="pattern-cell" data-cell="5"></div>
-                                <div class="pattern-cell" data-cell="6"></div>
-                                <div class="pattern-cell" data-cell="7"></div>
-                                <div class="pattern-cell" data-cell="8"></div>
-                                <div class="pattern-cell" data-cell="9"></div>
-                            </div>
-                            <div class="game-controls">
-                                <span class="level">Level: <span id="pattern-level">1</span></span>
-                                <button class="start-sequence" onclick="startPatternGame()">Start</button>
-                            </div>
-                        </div>
-                        <button class="start-puzzle-btn">Play</button>
-                    </div>
+    // Initialize with a new chat
+    startNewChat();
 
-                    <!-- Code Breaker -->
-                    <div class="puzzle-card" data-game="codebreaker">
-                        <div class="puzzle-header">
-                            <h3>Code Breaker</h3>
-                            <span class="difficulty">Hard</span>
-                        </div>
-                        <p>Crack the color code using logic and deduction.</p>
-                        <div id="codebreaker-game" class="puzzle-container hidden">
-                            <div class="game-description">Crack the color code using logic and deduction.</div>
-                            <div class="code-grid"></div>
-                            <div class="color-picker"></div>
-                            <div class="guess-history"></div>
-                            <div class="game-controls">
-                                <button class="check-btn">Check</button>
-                                <button class="new-game-btn">New Game</button>
-                            </div>
-                        </div>
-                        <button class="start-puzzle-btn">Play</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="chatbot-container">
-            <div id="chatbot-header">TriviaBot Chat</div>
-            <div id="chatbot-messages"></div>
-            <div id="chatbot-input-container">
-                <input type="text" id="chatbot-input" placeholder="Ask me anything..." />
-                <button id="chatbot-send">Send</button>
-            </div>
-        </div>
-    </main>
-
-    <script src="/script.js"></script>
-    <script src="/puzzles.js"></script>
-    <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-    </script>
+    // Add scroll animation for nav bar
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const nav = document.querySelector('nav');
+      const currentScroll = window.pageYOffset;
+      
+      if (currentScroll <= 0) {
+        nav.style.transform = 'translateY(0)';
+        return;
+      }
+      
+      if (currentScroll > lastScroll) {
+        nav.style.transform = 'translateY(-100%)';
+      } else {
+        nav.style.transform = 'translateY(0)';
+      }
+      
+      lastScroll = currentScroll;
+    });
+  </script>
 </body>
 </html>
