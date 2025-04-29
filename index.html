@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TriviaBot</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="data:,">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@lucide/web@latest"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i data-lucide="brain-circuit"></i>
+            <span>TriviaBot</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-link active" data-page="home">Home</a>
+            <a href="#" class="nav-link" data-page="leaderboard">Leaderboard</a>
+            <a href="#" class="nav-link" data-page="profile">Profile</a>
+            <a href="#" class="nav-link" data-page="puzzles">Puzzles</a>
+        </div>
+        <div class="nav-auth">
+            <span class="username-display"></span>
+            <button class="login-btn" onclick="toggleLogin()">Login</button>
+            <button class="logout-btn hidden" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Welcome to TriviaBot</h2>
+                <p class="modal-subtitle">Sign in to track your progress and compete with others!</p>
+            </div>
+            
+            <div class="social-login">
+                <button class="social-btn google-btn">
+                    <i data-lucide="chrome"></i>
+                    Continue with Google
+                </button>
+                <button class="social-btn apple-btn">
+                    <i data-lucide="smartphone"></i>
+                    Continue with Apple
+                </button>
+                <button class="social-btn microsoft-btn">
+                    <i data-lucide="windows"></i>
+                    Continue with Microsoft
+                </button>
+            </div>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-group">
+                        <i data-lucide="user"></i>
+                        <input type="text" id="username" placeholder="Enter your username" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="password" placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+                <button type="submit" class="login-btn">Sign In</button>
+            </form>
+
+            <div class="signup-prompt">
+                <p>Don't have an account? <a href="#" onclick="toggleSignup()">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <main id="app">
+        <div id="welcome-screen" class="screen">
+            <div class="welcome-content">
+                <i data-lucide="brain-circuit" class="large-icon"></i>
+                <h1>Welcome to TriviaBot</h1>
+                <p>Challenge yourself with our exciting trivia questions!</p>
+                
+                <div class="game-settings">
+                    <div class="setting-group">
+                        <label>Category:</label>
+                        <select id="category">
+                            <option value="9">General Knowledge</option>
+                            <option value="10">Entertainment: Books</option>
+                            <option value="11">Entertainment: Film</option>
+                            <option value="12">Entertainment: Music</option>
+                            <option value="15">Entertainment: Video Games</option>
+                            <option value="17">Science & Nature</option>
+                            <option value="18">Science: Computers</option>
+                            <option value="21">Sports</option>
+                            <option value="23">History</option>
+                            <option value="24">Politics</option>
+                            <option value="27">Animals</option>
+                            <option value="28">Vehicles</option>
+                            <option value="29">Aircraft</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>Difficulty:</label>
+                        <select id="difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="start-btn" class="pulse-button">Start Game</button>
+            </div>
+        </div>
+
+        <div id="game-screen" class="screen hidden">
+            <div class="game-header">
+                <div class="game-stats">
+                    <div class="stat">
+                        <i data-lucide="timer"></i>
+                        <span id="timer">30s</span>
+                    </div>
+                    <div class="stat">
+                        <i data-lucide="zap"></i>
+                        <span id="streak">0 🔥</span>
+                    </div>
+                    <div class="stat">
+                        <i data-lucide="star"></i>
+                        <span id="score">0 / 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-container">
+                <div class="question-meta">
+                    <div class="meta-item">
+                        <i data-lucide="settings"></i>
+                        <span id="current-category">Category: </span>
+                    </div>
+                    <span class="meta-separator">•</span>
+                    <div class="meta-item">
+                        <span id="question-number">Question 1 of 10</span>
+                    </div>
+                </div>
+                <p id="question-text"></p>
+            </div>
+
+            <div id="feedback" class="feedback hidden"></div>
+
+            <div id="answers" class="answers-grid"></div>
+
+            <div id="next-button" class="next-container hidden">
+                <button onclick="nextQuestion()">
+                    Next Question
+                    <i data-lucide="arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="game-over-screen" class="screen hidden">
+            <div class="game-over-content">
+                <i data-lucide="trophy" class="large-icon trophy"></i>
+                <h2>Game Over!</h2>
+                <div class="final-stats">
+                    <p class="final-score">Final Score: <span id="final-score">0</span> / 10</p>
+                    <p class="highest-streak">Highest Streak: <span id="final-streak">0</span> 🔥</p>
+                </div>
+                <button onclick="restartGame()">Play Again</button>
+            </div>
+        </div>
+
+        <div id="leaderboard-screen" class="screen hidden">
+            <div class="leaderboard-content">
+                <h2>🏆 Global Leaderboard</h2>
+                <div class="leaderboard-filters">
+                    <select id="leaderboard-category">
+                        <option value="all">All Categories</option>
+                        <option value="9">General Knowledge</option>
+                        <option value="18">Science: Computers</option>
+                        <option value="21">Sports</option>
+                    </select>
+                    <select id="leaderboard-timeframe">
+                        <option value="all-time">All Time</option>
+                        <option value="weekly">This Week</option>
+                        <option value="daily">Today</option>
+                    </select>
+                </div>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Score</th>
+                            <th>Streak</th>
+                            <th>Category</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="profile-screen" class="screen hidden">
+            <div class="profile-content">
+                <div class="profile-header">
+                    <i data-lucide="user" class="profile-avatar"></i>
+                    <h2 id="profile-username">Guest User</h2>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <i data-lucide="trophy"></i>
+                        <div class="stat-info">
+                            <h3>Total Games</h3>
+                            <p id="profile-total-games">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i data-lucide="target"></i>
+                        <div class="stat-info">
+                            <h3>Average Score</h3>
+                            <p id="profile-avg-score">0%</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i data-lucide="zap"></i>
+                        <div class="stat-info">
+                            <h3>Best Streak</h3>
+                            <p id="profile-best-streak">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="recent-games">
+                    <h3>Recent Games</h3>
+                    <div id="recent-games-list" class="recent-games-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="puzzles-screen" class="screen hidden">
+            <div class="puzzles-content">
+                <h2>🧩 Brain Teasers</h2>
+                <div class="puzzles-grid">
+                    <!-- Memory Match -->
+                    <div class="puzzle-card" data-game="memory">
+                        <div class="puzzle-header">
+                            <h3>Memory Match</h3>
+                            <span class="difficulty">Medium</span>
+                        </div>
+                        <p>Match pairs of cards in this classic memory game.</p>
+                        <div id="memory-game" class="puzzle-container hidden">
+                            <div class="memory-grid"></div>
+                            <div class="game-controls">
+                                <span class="moves">Moves: 0</span>
+                                <button class="restart-btn">Restart</button>
+                            </div>
+                        </div>
+                        <button class="start-puzzle-btn">Play</button>
+                    </div>
+
+                    <!-- Word Scramble -->
+                    <div class="puzzle-card" data-game="word-scramble">
+                        <div class="puzzle-header">
+                            <h3>Word Scramble</h3>
+                            <span class="difficulty">Easy</span>
+                        </div>
+                        <p>Unscramble the letters to find the hidden word.</p>
+                        <div id="word-scramble-game" class="puzzle-container hidden">
+                            <div class="scrambled-word"></div>
+                            <input type="text" class="word-input" placeholder="Enter your answer">
+                            <div class="game-controls">
+                                <span class="score">Score: 0</span>
+                                <button class="check-btn">Check</button>
+                                <button class="next-word-btn hidden">Next Word</button>
+                            </div>
+                        </div>
+                        <button class="start-puzzle-btn">Play</button>
+                    </div>
+
+                    <!-- Number Slider -->
+                    <div class="puzzle-card" data-game="slider">
+                        <div class="puzzle-header">
+                            <h3>Number Slider</h3>
+                            <span class="difficulty">Hard</span>
+                        </div>
+                        <p>Slide the numbers to put them in order.</p>
+                        <div id="slider-game" class="puzzle-container hidden">
+                            <div class="slider-grid"></div>
+                            <div class="game-controls">
+                                <span class="moves">Moves: 0</span>
+                                <button class="restart-btn">Restart</button>
+                            </div>
+                        </div>
+                        <button class="start-puzzle-btn">Play</button>
+                    </div>
+
+                    <!-- Pattern Memory -->
+                    <div class="puzzle-card" data-game="pattern">
+                        <div class="puzzle-header">
+                            <h3>Pattern Memory</h3>
+                            <span class="difficulty">Medium</span>
+                        </div>
+                        <p>Remember and repeat the pattern sequence.</p>
+                        <div id="pattern-game" class="puzzle-container hidden">
+                            <div class="pattern-grid">
+                                <!-- Add 9 grid cells for the pattern game -->
+                                <div class="pattern-cell" data-cell="1"></div>
+                                <div class="pattern-cell" data-cell="2"></div>
+                                <div class="pattern-cell" data-cell="3"></div>
+                                <div class="pattern-cell" data-cell="4"></div>
+                                <div class="pattern-cell" data-cell="5"></div>
+                                <div class="pattern-cell" data-cell="6"></div>
+                                <div class="pattern-cell" data-cell="7"></div>
+                                <div class="pattern-cell" data-cell="8"></div>
+                                <div class="pattern-cell" data-cell="9"></div>
+                            </div>
+                            <div class="game-controls">
+                                <span class="level">Level: <span id="pattern-level">1</span></span>
+                                <button class="start-sequence" onclick="startPatternGame()">Start</button>
+                            </div>
+                        </div>
+                        <button class="start-puzzle-btn">Play</button>
+                    </div>
+
+                    <!-- Code Breaker -->
+                    <div class="puzzle-card" data-game="codebreaker">
+                        <div class="puzzle-header">
+                            <h3>Code Breaker</h3>
+                            <span class="difficulty">Hard</span>
+                        </div>
+                        <p>Crack the color code using logic and deduction.</p>
+                        <div id="codebreaker-game" class="puzzle-container hidden">
+                            <div class="game-description">Crack the color code using logic and deduction.</div>
+                            <div class="code-grid"></div>
+                            <div class="color-picker"></div>
+                            <div class="guess-history"></div>
+                            <div class="game-controls">
+                                <button class="check-btn">Check</button>
+                                <button class="new-game-btn">New Game</button>
+                            </div>
+                        </div>
+                        <button class="start-puzzle-btn">Play</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="chatbot-container">
+            <div id="chatbot-header">TriviaBot Chat</div>
+            <div id="chatbot-messages"></div>
+            <div id="chatbot-input-container">
+                <input type="text" id="chatbot-input" placeholder="Ask me anything..." />
+                <button id="chatbot-send">Send</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="/script.js"></script>
+    <script src="/puzzles.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
